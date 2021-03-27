@@ -1,65 +1,50 @@
-def is_prime(n):
-    if (n <= 1):
-        return False
+def get_input_matrix():
+    user_input = input().split()
 
-    if (n <= 3):
-        return True
+    n = int(user_input[0])
+    m = int(user_input[1])
+
+    matrix = []
+
+    for i in range(n):
+        user_input_matrix = input().split()
+        row = []
+        for j in range(m):
+            row.append(int(user_input_matrix[j]))
+        matrix.append(row)
     
-    if (n % 2 == 0 or n % 3 == 0):
-        return False
-    
-    for i in range(5, int(n / 2)):
-        if ((n % i) == 0):
-            return False
+    return (matrix, n, m)
 
-    return True
+def prime_sieve(n):
+    primes, sieve = {}, [True] * int(n + 1)
 
-user_input = input().split()
+    for p in range(2, n + 1):
+        if sieve[p]:
+            primes[p] = p
+            for i in range(p * p, n + 1, p):
+                sieve[i] = False
 
-n = int(user_input[0])
-m = int(user_input[1])
+    return primes
+
+matrix, n, m = get_input_matrix()
+primes = prime_sieve(100100)
 
 lesser_row_count = 999999
-lesser_column_count = 999999
 
-matrix = []
-
-for i in range(n):
-    user_input_matrix = input().split()
-    row = []
-    for j in range(m):
-        row.append(int(user_input_matrix[j]))
-    matrix.append(row)
-
-times_incremented_matrix = []
+columns_count = [0] * m
 
 for i in range(n):
-    row = []
     row_count = 0
 
     for j in range(m):
-        times_incremented = 0
-        value = matrix[i][j]
+        while (not primes.get(matrix[i][j])):
+            matrix[i][j] += 1
+            row_count += 1
+            columns_count[j] += 1
 
-        while (not is_prime(value)):
-            value += 1
-            times_incremented += 1
+            if row_count >= lesser_row_count and columns_count[j] >= lesser_row_count:
+                break
 
-        row_count += times_incremented
-        row.append(times_incremented)
-    
     lesser_row_count = min(row_count, lesser_row_count)
-    times_incremented_matrix.append(row)
 
-if lesser_row_count > 0:
-    for j in range(m):
-        column_count = 0
-        for i in range(n):
-            column_count += times_incremented_matrix[i][j]
-
-        lesser_column_count = min(column_count, lesser_column_count)
-
-        if column_count == 0:
-            break
-
-print(min(lesser_row_count, lesser_column_count))
+print(min(lesser_row_count, *columns_count))
